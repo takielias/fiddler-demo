@@ -606,6 +606,7 @@ jobs:
     needs:
       - init_os_arch
       - patch_fe
+    if: ${{ !cancelled() && needs.patch_fe.result == 'success' }}
 
     permissions:
       contents: write
