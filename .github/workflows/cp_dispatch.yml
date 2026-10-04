@@ -255,6 +255,11 @@ jobs:
       - validate-version
 
     steps:
+      - name: Checkout extract-asar util
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: utils/extract-asar
+
       - name: Build URL & Download
         run: |
           # Retrieve the patchingVersion version from the previous step
@@ -285,7 +290,8 @@ jobs:
 
           if ((Test-Path "$resources/app.asar") -and -not (Test-Path "$resources/app")) {
             Write-Host "app.asar found, extracting to resources/app"
-            npx --yes @electron/asar extract "$resources/app.asar" "$resources/app"
+            npm install --prefix utils/extract-asar --silent
+            node utils/extract-asar/extract-asar.mjs "$resources/app.asar" "$resources/app"
 
             # app.asar.unpacked files take precedence (native binaries etc.)
             if (Test-Path "$resources/app.asar.unpacked") {
@@ -320,6 +326,11 @@ jobs:
       - validate-version
 
     steps:
+      - name: Checkout extract-asar util
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: utils/extract-asar
+
       - name: Build URL & Download
         run: |
           # Retrieve the version to patch from the previous step
@@ -352,7 +363,8 @@ jobs:
 
           if ((Test-Path "$resources/app.asar") -and -not (Test-Path "$resources/app")) {
             Write-Host "app.asar found, extracting to resources/app"
-            npx --yes @electron/asar extract "$resources/app.asar" "$resources/app"
+            npm install --prefix utils/extract-asar --silent
+            node utils/extract-asar/extract-asar.mjs "$resources/app.asar" "$resources/app"
 
             # app.asar.unpacked files take precedence (native binaries etc.)
             if (Test-Path "$resources/app.asar.unpacked") {
@@ -475,24 +487,6 @@ jobs:
 
       - name: Rename main FE folder
         run: Rename-Item -Path "fe_app" -NewName "FE"
-
-      - name: Normalize app layout (extract app.asar, fallback)
-        run: |
-          $resources = "FE/resources"
-
-          if ((Test-Path "$resources/app.asar") -and -not (Test-Path "$resources/app")) {
-            Write-Host "app.asar still present, extracting to resources/app"
-            npx --yes @electron/asar extract "$resources/app.asar" "$resources/app"
-
-            if (Test-Path "$resources/app.asar.unpacked") {
-              Copy-Item -Path "$resources/app.asar.unpacked/*" -Destination "$resources/app" -Recurse -Force
-            }
-
-            Remove-Item -Path "$resources/app.asar" -Force
-            Remove-Item -Path "$resources/app.asar.unpacked" -Recurse -Force
-          } else {
-            Write-Host "No app.asar, layout already normalized"
-          }
 
       - name: Patch fiddler.dll / libfiddler.dll
         run: |
