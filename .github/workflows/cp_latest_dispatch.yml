@@ -600,3 +600,47 @@ jobs:
           name: "${{ steps.rename-fe.outputs.patched-fe-name }}"
           path: "${{ steps.rename-fe.outputs.patched-fe-name }}/"
           if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - init_os_arch
+      - patch_fe
+
+    permissions:
+      contents: write
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PATCHED_FE_NAME: ${{ needs.patch_fe.outputs.patched-fe-name }}
+      ARCH_CODE: ${{ needs.init_os_arch.outputs.arch_code }}
+
+    steps:
+      - name: Download patched FE
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.patch_fe.outputs.patched-fe-name }}
+          path: ${{ needs.patch_fe.outputs.patched-fe-name }}
+
+      - name: Zip patched FE
+        id: zip
+        run: |
+          $zip = "$env:PATCHED_FE_NAME-$env:ARCH_CODE.zip"
+          zip -r -q $zip $env:PATCHED_FE_NAME
+          "zip=$zip" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
+          Get-Item $zip | Select-Object Name, Length
+
+      - name: Create or update release
+        env:
+          ZIP_FILE: ${{ steps.zip.outputs.zip }}
+        run: |
+          $tag = "$env:PATCHED_FE_NAME-$env:ARCH_CODE"
+          $notes = "Patched $env:PATCHED_FE_NAME for $env:ARCH_CODE. Built by workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $env:ZIP_FILE --clobber --repo $env:GITHUB_REPOSITORY
+          } else {
+            gh release create $tag $env:ZIP_FILE --title $tag --notes $notes --target ${{ github.sha }} --repo $env:GITHUB_REPOSITORY
+          }
+          if ($LASTEXITCODE -ne 0) { exit 1 }

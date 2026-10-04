@@ -52,7 +52,7 @@ This's the guide for applying patch automatically.
 
  * Workflow Dispatch? or Workflow Dispatch Latest?
    - Latest Version - Workflow Dispatch - Patch the latest version, and upload as artifact.
-   - Custom Version - Workflow Dispatch - Allows you to select a compatible version (5.9.0 +) and patch  and upload as a workflow artifact.
+   - Custom Version - Workflow Dispatch - Allows you to select a compatible version (5.9.0 +) and patch, upload as a workflow artifact and publish a release.
 
 > [!TIP]
 > We highly reccomend you to use ***Latest Version - Workflow Dispatch***, which patch the latest available version.
@@ -66,7 +66,7 @@ This's the guide for applying patch automatically.
   - Fork this repo.
   - Go to actions tab, Select `Latest Version - Workflow Dispatch` workflow.
   - Trigger it with `workflow dispatch`
-  - After a successful trigger download artifact that named like `Fiddler-Everywhere-VX.X.X-Patched`
+  - After a successful trigger, download the zip from the [Releases](../../releases) page (named like `Fiddler-Everywhere-VX.X.X-Patched-win32-x86_64.zip`), or the artifact from the run page
   - Extract it. Run it
 
   * *Here how you do it...*
@@ -80,7 +80,7 @@ This's the guide for applying patch automatically.
   - Fork this repo
   - Go to actions tab, Select `Custom Version - Workflow Dispatch` workflow.
   - Trigger it with `workflow diaptch` providing the version you want to patch
-  - After a successful trigger download artifact that named like `Fiddler-Everywhere-VX.X.X-Patched`
+  - After a successful trigger, download the zip from the [Releases](../../releases) page (named like `Fiddler-Everywhere-VX.X.X-Patched-win32-x86_64.zip`), or the artifact from the run page
   - Extract it. Run it
 
   > [!WARNING]
